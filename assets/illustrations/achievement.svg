@@ -1,0 +1,67 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="90" fill="#E8F5E8" opacity="0.3"/>
+  
+  <!-- Cute rabbit character celebrating -->
+  <!-- Head -->
+  <ellipse cx="100" cy="90" rx="45" ry="40" fill="#FFF" stroke="#FFB6C1" stroke-width="2"/>
+  
+  <!-- Ears -->
+  <ellipse cx="80" cy="50" rx="12" ry="30" fill="#FFF" stroke="#FFB6C1" stroke-width="2" transform="rotate(-20 80 50)"/>
+  <ellipse cx="120" cy="50" rx="12" ry="30" fill="#FFF" stroke="#FFB6C1" stroke-width="2" transform="rotate(20 120 50)"/>
+  
+  <!-- Inner ears -->
+  <ellipse cx="80" cy="50" rx="6" ry="18" fill="#FFB6C1" transform="rotate(-20 80 50)"/>
+  <ellipse cx="120" cy="50" rx="6" ry="18" fill="#FFB6C1" transform="rotate(20 120 50)"/>
+  
+  <!-- Eyes (happy) -->
+  <path d="M85 85 Q90 90 95 85" stroke="#333" stroke-width="3" fill="none"/>
+  <path d="M105 85 Q110 90 115 85" stroke="#333" stroke-width="3" fill="none"/>
+  
+  <!-- Nose -->
+  <ellipse cx="100" cy="92" rx="3" ry="2" fill="#FFB6C1"/>
+  
+  <!-- Mouth (smiling) -->
+  <path d="M100 95 Q90 105 80 100" stroke="#333" stroke-width="2" fill="none"/>
+  <path d="M100 95 Q110 105 120 100" stroke="#333" stroke-width="2" fill="none"/>
+  
+  <!-- Cheeks -->
+  <circle cx="70" cy="90" r="8" fill="#FFB6C1" opacity="0.5"/>
+  <circle cx="130" cy="90" r="8" fill="#FFB6C1" opacity="0.5"/>
+  
+  <!-- Trophy -->
+  <g transform="translate(100, 140)">
+    <!-- Trophy cup -->
+    <path d="M-20 -10 L-15 -30 L15 -30 L20 -10 Z" fill="#FFD700" stroke="#FFA500" stroke-width="2"/>
+    <ellipse cx="0" cy="-10" rx="18" ry="5" fill="#FFD700" stroke="#FFA500" stroke-width="2"/>
+    
+    <!-- Trophy handles -->
+    <path d="M-20 -20 Q-25 -25 -20 -30" stroke="#FFD700" stroke-width="4" fill="none"/>
+    <path d="M20 -20 Q25 -25 20 -30" stroke="#FFD700" stroke-width="4" fill="none"/>
+    
+    <!-- Trophy base -->
+    <rect x="-8" y="-5" width="16" height="15" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+    <rect x="-5" y="10" width="10" height="5" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+    
+    <!-- Star on trophy -->
+    <path d="M0 -25 L3 -20 L8 -19 L4 -15 L5 -10 L0 -12 L-5 -10 L-4 -15 L-8 -19 L-3 -20 Z" fill="#FFF"/>
+  </g>
+  
+  <!-- Confetti -->
+  <g opacity="0.8">
+    <rect x="30" y="30" width="6" height="6" fill="#FF6B6B" transform="rotate(45 33 33)"/>
+    <rect x="160" y="40" width="5" height="5" fill="#4ECDC4" transform="rotate(30 162.5 42.5)"/>
+    <rect x="170" y="160" width="4" height="4" fill="#45B7D1" transform="rotate(60 172 162)"/>
+    <rect x="20" y="170" width="5" height="5" fill="#96CEB4" transform="rotate(15 22.5 172.5)"/>
+    <rect x="140" y="20" width="6" height="6" fill="#FFEAA7" transform="rotate(75 143 23)"/>
+    <rect x="50" y="180" width="4" height="4" fill="#DDA0DD" transform="rotate(45 52 182)"/>
+  </g>
+  
+  <!-- Sparkles -->
+  <g opacity="0.7">
+    <path d="M60 70 L61 72 L63 72 L61.5 73.5 L62.5 75.5 L60.5 74.5 L58.5 75.5 L59.5 73.5 L58 72 L60 72 Z" fill="#FFD700"/>
+    <path d="M140 60 L141 62 L143 62 L141.5 63.5 L142.5 65.5 L140.5 64.5 L138.5 65.5 L139.5 63.5 L138 62 L140 62 Z" fill="#FFD700"/>
+    <path d="M160 100 L161 102 L163 102 L161.5 103.5 L162.5 105.5 L160.5 104.5 L158.5 105.5 L159.5 103.5 L158 102 L160 102 Z" fill="#FFD700"/>
+    <path d="M40 120 L41 122 L43 122 L41.5 123.5 L42.5 125.5 L40.5 124.5 L38.5 125.5 L39.5 123.5 L38 122 L40 122 Z" fill="#FFD700"/>
+  </g>
+</svg>

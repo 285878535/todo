@@ -1,0 +1,64 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="90" fill="#FFF3E0" opacity="0.3"/>
+  
+  <!-- Cute bear character with timer -->
+  <!-- Head -->
+  <circle cx="100" cy="80" r="40" fill="#D2691E" stroke="#8B4513" stroke-width="2"/>
+  
+  <!-- Ears -->
+  <circle cx="70" cy="60" r="20" fill="#D2691E" stroke="#8B4513" stroke-width="2"/>
+  <circle cx="130" cy="60" r="20" fill="#D2691E" stroke="#8B4513" stroke-width="2"/>
+  
+  <!-- Inner ears -->
+  <circle cx="70" cy="60" r="12" fill="#CD853F"/>
+  <circle cx="130" cy="60" r="12" fill="#CD853F"/>
+  
+  <!-- Eyes -->
+  <circle cx="85" cy="75" r="5" fill="#333"/>
+  <circle cx="115" cy="75" r="5" fill="#333"/>
+  <circle cx="87" cy="73" r="2" fill="#FFF"/>
+  <circle cx="117" cy="73" r="2" fill="#FFF"/>
+  
+  <!-- Nose -->
+  <ellipse cx="100" cy="85" rx="4" ry="3" fill="#8B4513"/>
+  
+  <!-- Mouth -->
+  <path d="M100 90 Q90 95 85 90" stroke="#8B4513" stroke-width="2" fill="none"/>
+  <path d="M100 90 Q110 95 115 90" stroke="#8B4513" stroke-width="2" fill="none"/>
+  
+  <!-- Timer body -->
+  <rect x="70" y="110" width="60" height="50" rx="25" fill="#FF6B6B" stroke="#E55555" stroke-width="2"/>
+  
+  <!-- Timer display -->
+  <rect x="80" y="120" width="40" height="20" rx="5" fill="#333"/>
+  <text x="100" y="133" text-anchor="middle" fill="#4CAF50" font-family="monospace" font-size="12" font-weight="bold">25:00</text>
+  
+  <!-- Timer buttons -->
+  <circle cx="85" cy="145" r="4" fill="#4CAF50"/>
+  <circle cx="115" cy="145" r="4" fill="#F44336"/>
+  
+  <!-- Paws holding timer -->
+  <circle cx="55" cy="130" r="15" fill="#D2691E" stroke="#8B4513" stroke-width="2"/>
+  <circle cx="145" cy="130" r="15" fill="#D2691E" stroke="#8B4513" stroke-width="2"/>
+  
+  <!-- Paw pads -->
+  <ellipse cx="55" cy="130" rx="8" ry="6" fill="#8B4513"/>
+  <ellipse cx="145" cy="130" rx="8" ry="6" fill="#8B4513"/>
+  
+  <!-- Sparkles around timer -->
+  <g opacity="0.7">
+    <path d="M90 100 L91 102 L93 102 L91.5 103.5 L92.5 105.5 L90.5 104.5 L88.5 105.5 L89.5 103.5 L88 102 L90 102 Z" fill="#FFD700"/>
+    <path d="M110 95 L111 97 L113 97 L111.5 98.5 L112.5 100.5 L110.5 99.5 L108.5 100.5 L109.5 98.5 L108 97 L110 97 Z" fill="#FFD700"/>
+    <path d="M130 110 L131 112 L133 112 L131.5 113.5 L132.5 115.5 L130.5 114.5 L128.5 115.5 L129.5 113.5 L128 112 L130 112 Z" fill="#FFD700"/>
+    <path d="M70 115 L71 117 L73 117 L71.5 118.5 L72.5 120.5 L70.5 119.5 L68.5 120.5 L69.5 118.5 L68 117 L70 117 Z" fill="#FFD700"/>
+  </g>
+  
+  <!-- Progress dots -->
+  <g opacity="0.6">
+    <circle cx="40" cy="160" r="3" fill="#4CAF50"/>
+    <circle cx="50" cy="165" r="2" fill="#2196F3"/>
+    <circle cx="150" cy="160" r="3" fill="#FF9800"/>
+    <circle cx="160" cy="165" r="2" fill="#9C27B0"/>
+  </g>
+</svg>

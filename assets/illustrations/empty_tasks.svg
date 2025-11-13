@@ -1,0 +1,55 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="90" fill="#EAF1FF" opacity="0.3"/>
+  
+  <!-- Cute cat character -->
+  <!-- Head -->
+  <circle cx="100" cy="100" r="50" fill="#FFB6C1" stroke="#FF69B4" stroke-width="2"/>
+  
+  <!-- Ears -->
+  <path d="M60 80 L50 50 L80 60 Z" fill="#FFB6C1" stroke="#FF69B4" stroke-width="2"/>
+  <path d="M140 80 L150 50 L120 60 Z" fill="#FFB6C1" stroke="#FF69B4" stroke-width="2"/>
+  
+  <!-- Inner ears -->
+  <path d="M58 75 L52 58 L70 62 Z" fill="#FF69B4"/>
+  <path d="M142 75 L148 58 L130 62 Z" fill="#FF69B4"/>
+  
+  <!-- Eyes -->
+  <circle cx="85" cy="95" r="8" fill="#333"/>
+  <circle cx="115" cy="95" r="8" fill="#333"/>
+  <circle cx="87" cy="93" r="3" fill="#FFF"/>
+  <circle cx="117" cy="93" r="3" fill="#FFF"/>
+  
+  <!-- Nose -->
+  <path d="M100 105 L95 110 L105 110 Z" fill="#FF1493"/>
+  
+  <!-- Mouth -->
+  <path d="M100 110 Q90 115 85 110" stroke="#333" stroke-width="2" fill="none"/>
+  <path d="M100 110 Q110 115 115 110" stroke="#333" stroke-width="2" fill="none"/>
+  
+  <!-- Whiskers -->
+  <line x1="50" y1="100" x2="70" y2="98" stroke="#333" stroke-width="1"/>
+  <line x1="50" y1="105" x2="70" y2="105" stroke="#333" stroke-width="1"/>
+  <line x1="130" y1="98" x2="150" y2="100" stroke="#333" stroke-width="1"/>
+  <line x1="130" y1="105" x2="150" y2="105" stroke="#333" stroke-width="1"/>
+  
+  <!-- Checklist items floating around -->
+  <rect x="30" y="30" width="20" height="15" rx="3" fill="#4CAF50" opacity="0.8"/>
+  <path d="M33 37 L36 40 L42 34" stroke="#FFF" stroke-width="2" fill="none"/>
+  
+  <rect x="150" y="40" width="20" height="15" rx="3" fill="#2196F3" opacity="0.8"/>
+  <path d="M153 47 L156 50 L162 44" stroke="#FFF" stroke-width="2" fill="none"/>
+  
+  <rect x="160" y="130" width="20" height="15" rx="3" fill="#FF9800" opacity="0.8"/>
+  <path d="M163 137 L166 140 L172 134" stroke="#FFF" stroke-width="2" fill="none"/>
+  
+  <rect x="20" y="140" width="20" height="15" rx="3" fill="#9C27B0" opacity="0.8"/>
+  <path d="M23 147 L26 150 L32 144" stroke="#FFF" stroke-width="2" fill="none"/>
+  
+  <!-- Sparkles -->
+  <g opacity="0.6">
+    <path d="M70 60 L72 65 L77 65 L73 68 L75 73 L70 70 L65 73 L67 68 L63 65 L68 65 Z" fill="#FFD700" opacity="0.7"/>
+    <path d="M130 50 L131 52 L133 52 L131.5 53.5 L132.5 55.5 L130.5 54.5 L128.5 55.5 L129.5 53.5 L128 52 L130 52 Z" fill="#FFD700" opacity="0.7"/>
+    <path d="M160 90 L161 92 L163 92 L161.5 93.5 L162.5 95.5 L160.5 94.5 L158.5 95.5 L159.5 93.5 L158 92 L160 92 Z" fill="#FFD700" opacity="0.7"/>
+  </g>
+</svg>
