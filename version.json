@@ -1,0 +1,10 @@
+{
+    "latest_version": "1.2.3",
+    "latest_build": 5,
+    "update_url": "https://your.cdn.com/app-release.apk",
+    "release_notes": "修复问题/新增功能",
+    "force_update": false,
+    "min_version": "1.0.0",
+    "file_size": "25 MB",
+    "release_date": "2025-11-16"
+    }
