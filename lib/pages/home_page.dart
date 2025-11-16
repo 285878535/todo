@@ -1,30 +1,85 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import '../state/app_state.dart';
 import '../models/task.dart';
 import '../utils/recurring_task_manager.dart';
+import '../utils/page_transitions.dart';
+import '../services/tutorial_service.dart';
 import 'edit_task_page.dart';
 import 'settings_page.dart';
 import 'stats_page.dart';
 import 'timer_page.dart';
 import 'nlp_task_dialog.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  bool _tutorialShown = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAndShowTutorial();
+  }
+
+  Future<void> _checkAndShowTutorial() async {
+    // 等待第一帧渲染完成
+    await Future.delayed(Duration.zero);
+    if (!mounted) return;
+    
+    // 等待 AppState 初始化完成（不再需要等待创建示例任务）
+    await Future.delayed(const Duration(milliseconds: 800));
+    if (!mounted) return;
+    
+    final completed = await TutorialService.isTutorialCompleted();
+    
+    if (!completed && !_tutorialShown) {
+      _tutorialShown = true;
+      // 使用 addPostFrameCallback 确保在帧渲染后显示
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _showTutorial();
+        }
+      });
+    }
+  }
+
+  void _showTutorial() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => TutorialOverlay(
+        steps: TutorialService.getHomePageSteps(),
+        onComplete: () {
+          Navigator.of(context).pop();
+        },
+        onSkip: () {
+          Navigator.of(context).pop();
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<AppState>(builder: (context, state, _) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('习惯待办'),
+          title: const Text('即刻清单'),
           actions: [
             IconButton(
               icon: const Icon(Icons.bar_chart),
               onPressed: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const StatsPage()),
+                  FadePageRoute(page: const StatsPage()),
                 );
               },
             ),
@@ -32,92 +87,63 @@ class HomePage extends StatelessWidget {
               icon: const Icon(Icons.settings),
               onPressed: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const SettingsPage()),
+                  FadePageRoute(page: const SettingsPage()),
                 );
               },
             ),
           ],
         ),
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFFEAF1FF), Color(0xFFFDF7F2)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: state.tasks.isEmpty
-              ? const _EmptyView()
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: state.tasks.length,
-                  itemBuilder: (context, index) {
+        body: state.tasks.isEmpty
+            ? const _EmptyView()
+            : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: state.tasks.length,
+                itemBuilder: (context, index) {
                     final t = state.tasks[index];
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: _TaskCard(
-                        task: t,
-                        onTap: () {
-                          // 点击列表项进入计时页面，但不自动开始
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => TimerPage(taskId: t.id)),
-                          );
-                        },
-                        onDelete: () async {
-                          final confirm = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('确认删除'),
-                              content: Text('确定要删除任务"${t.name}"吗？'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context, false),
-                                  child: const Text('取消'),
-                                ),
-                                FilledButton(
-                                  onPressed: () => Navigator.pop(context, true),
-                                  style: FilledButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                  ),
-                                  child: const Text('删除'),
-                                ),
-                              ],
+                      child: Slidable(
+                        key: ValueKey(t.id),
+                        endActionPane: ActionPane(
+                          motion: const DrawerMotion(),
+                          children: [
+                            SlidableAction(
+                              onPressed: (context) {
+                                Navigator.of(context).push(
+                                  FadePageRoute(page: EditTaskPage(task: t)),
+                                );
+                              },
+                              backgroundColor: const Color(0xFF0288D1),
+                              foregroundColor: Colors.white,
+                              icon: Icons.edit,
+                              label: '编辑',
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                          );
-                          if (confirm == true) {
-                            state.deleteTask(t.id);
-                          }
-                        },
-                        onPlay: () async {
-                          final confirm = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('开始任务'),
-                              content: Text('开始任务"${t.name}"？'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context, false),
-                                  child: const Text('取消'),
-                                ),
-                                FilledButton(
-                                  onPressed: () => Navigator.pop(context, true),
-                                  child: const Text('开始'),
-                                ),
-                              ],
+                            SlidableAction(
+                              onPressed: (context) {
+                                state.deleteTask(t.id);
+                              },
+                              backgroundColor: const Color(0xFFD32F2F),
+                              foregroundColor: Colors.white,
+                              icon: Icons.delete,
+                              label: '删除',
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                          );
-                          if (confirm == true) {
-                            state.startTask(t.id);
+                          ],
+                        ),
+                        child: _TaskCard(
+                          task: t,
+                          onTap: () {
+                            // 点击列表项进入计时页面，但不自动开始
                             Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => TimerPage(taskId: t.id)),
+                              ScaleFadePageRoute(page: TimerPage(taskId: t.id)),
                             );
-                          }
-                        },
+                          },
+                        ),
                       ),
                     );
-                  },
-                ),
-        ),
+                },
+              ),
         floatingActionButton: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -136,11 +162,11 @@ class HomePage extends StatelessWidget {
             FloatingActionButton.extended(
               onPressed: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const EditTaskPage()),
+                  FadePageRoute(page: const EditTaskPage()),
                 );
               },
               icon: const Icon(Icons.add),
-              label: const Text('新建任务'),
+              label: const Text('新建清单'),
             ),
           ],
         ),
@@ -154,22 +180,47 @@ class _EmptyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).colorScheme;
+    final isDark = c.brightness == Brightness.dark;
+    
     return Center(
-      child: Container(
-        padding: const EdgeInsets.all(32),
-        margin: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: c.primary.withValues(alpha: 0.08), 
-              blurRadius: 24, 
-              offset: const Offset(0, 12)
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+          child: Container(
+            padding: const EdgeInsets.all(40),
+            margin: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isDark
+                    ? [
+                        c.surface.withValues(alpha: 0.5),
+                        c.surface.withValues(alpha: 0.3),
+                      ]
+                    : [
+                        Colors.white.withValues(alpha: 0.8),
+                        Colors.white.withValues(alpha: 0.6),
+                      ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: isDark
+                    ? c.onSurface.withValues(alpha: 0.2)
+                    : Colors.white.withValues(alpha: 0.6),
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: c.primary.withValues(alpha: 0.1), 
+                  blurRadius: 30, 
+                  offset: const Offset(0, 15),
+                  spreadRadius: -5,
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Column(
+            child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
@@ -202,9 +253,7 @@ class _EmptyView extends StatelessWidget {
             FilledButton.icon(
               onPressed: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const EditTaskPage(),
-                  ),
+                  FadePageRoute(page: const EditTaskPage()),
                 );
               },
               icon: const Icon(Icons.add),
@@ -219,6 +268,8 @@ class _EmptyView extends StatelessWidget {
           ],
         ),
       ),
+    ),
+    ),
     );
   }
 }
@@ -226,13 +277,9 @@ class _EmptyView extends StatelessWidget {
 class _TaskCard extends StatelessWidget {
   final Task task;
   final VoidCallback onTap;
-  final VoidCallback onDelete;
-  final VoidCallback onPlay;
   const _TaskCard({
     required this.task,
     required this.onTap,
-    required this.onDelete,
-    required this.onPlay,
   });
 
   String _format(int seconds) {
@@ -244,31 +291,53 @@ class _TaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).colorScheme;
+    final isDark = c.brightness == Brightness.dark;
     
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            colors: task.isOverdue 
-              ? [const Color(0xFFFFF5F5), const Color(0xFFFFFBFB)]
-              : [const Color(0xFFFFFFFF), const Color(0xFFF9FBFF)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          boxShadow: [
-            BoxShadow(
+      borderRadius: BorderRadius.circular(20),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
               color: task.isOverdue 
-                ? Colors.red.withValues(alpha: 0.1) 
-                : c.primary.withValues(alpha: 0.06), 
-              blurRadius: 16, 
-              offset: const Offset(0, 8)
+                ? (isDark 
+                    ? const Color(0xFF4A1F1F)
+                    : const Color(0xFFFFEBEE))
+                : (isDark
+                    ? c.surface.withValues(alpha: 0.9)
+                    : Colors.white),
+              border: Border.all(
+                color: task.isOverdue
+                  ? Colors.red.withValues(alpha: isDark ? 0.4 : 0.2)
+                  : (isDark 
+                      ? c.onSurface.withValues(alpha: 0.2)
+                      : c.outline.withValues(alpha: 0.12)),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: task.isOverdue 
+                    ? Colors.red.withValues(alpha: 0.15) 
+                    : (isDark
+                        ? Colors.black.withValues(alpha: 0.4)
+                        : Colors.black.withValues(alpha: 0.08)), 
+                  blurRadius: isDark ? 16 : 12, 
+                  offset: Offset(0, isDark ? 6 : 4),
+                  spreadRadius: isDark ? -2 : -1,
+                ),
+                if (!isDark)
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+              ],
             ),
-          ],
-        ),
-        child: Padding(
+            child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
@@ -298,7 +367,15 @@ class _TaskCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             task.name, 
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                            style: TextStyle(
+                              fontSize: 18, 
+                              fontWeight: FontWeight.w600,
+                              decoration: task.completed ? TextDecoration.lineThrough : null,
+                              decorationThickness: 2,
+                              color: task.completed 
+                                  ? c.onSurface.withValues(alpha: 0.5)
+                                  : c.onSurface,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -466,7 +543,7 @@ class _TaskCard extends StatelessWidget {
                               ],
                             ),
                           );
-                        }).toList(),
+                        }),
                         if (task.tags.length > 2)
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -489,37 +566,17 @@ class _TaskCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _IconPill(
-                    icon: Icons.play_arrow, 
-                    onTap: (e) {
-                      e.stopPropagation();
-                      onPlay();
-                    }, 
-                    primary: true
-                  ),
-                  const SizedBox(height: 8),
-                  _IconPill(
-                    icon: Icons.delete_outline, 
-                    onTap: (e) {
-                      e.stopPropagation();
-                      onDelete();
-                    },
-                    danger: true,
-                  ),
-                ],
-              ),
             ],
           ),
         ),
       ),
+    ),
+    ),
     );
   }
 }
 
-class _InfoChip extends StatelessWidget {
+class _InfoChip extends StatelessWidget{
   final IconData icon;
   final String label;
   final String value;
@@ -565,52 +622,3 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
-class _IconPill extends StatelessWidget {
-  final IconData icon;
-  final Function(dynamic) onTap;
-  final bool primary;
-  final bool danger;
-  const _IconPill({
-    required this.icon, 
-    required this.onTap, 
-    this.primary = false,
-    this.danger = false,
-  });
-  @override
-  Widget build(BuildContext context) {
-    final c = Theme.of(context).colorScheme;
-    final Color bgColor = primary 
-        ? c.primary 
-        : danger 
-            ? Colors.red.shade50 
-            : Colors.white;
-    final Color iconColor = primary 
-        ? Colors.white 
-        : danger 
-            ? Colors.red 
-            : c.primary;
-    
-    return GestureDetector(
-      onTap: () => onTap(null),
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: bgColor,
-          boxShadow: [
-            BoxShadow(
-              color: primary 
-                  ? c.primary.withValues(alpha: 0.15) 
-                  : danger
-                      ? Colors.red.withValues(alpha: 0.1)
-                      : c.primary.withValues(alpha: 0.08), 
-              blurRadius: 8, 
-              offset: const Offset(0, 4)
-            )
-          ],
-        ),
-        child: Icon(icon, size: 18, color: iconColor),
-      ),
-    );
-  }
-}

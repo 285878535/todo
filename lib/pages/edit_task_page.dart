@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../models/task.dart';
 import '../state/app_state.dart';
 import '../utils/recurring_task_manager.dart';
+import '../widgets/gradient_background.dart';
+import '../theme.dart';
 
 class EditTaskPage extends StatefulWidget {
   final Task? task;
@@ -17,7 +19,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
   late TextEditingController _nameController;
   late TextEditingController _noteController;
   late TextEditingController _targetSecondsController;
-  TimerMode _mode = TimerMode.countdown;
+  TimerMode _mode = TimerMode.stopwatch; // 默认为计时模式
   Priority _priority = Priority.medium;
   List<Tag> _tags = [];
   DateTime? _dueDate;
@@ -30,9 +32,9 @@ class _EditTaskPageState extends State<EditTaskPage> {
     _nameController = TextEditingController(text: widget.task?.name ?? '');
     _noteController = TextEditingController(text: widget.task?.note ?? '');
     _targetSecondsController = TextEditingController(
-      text: widget.task?.targetSeconds.toString() ?? '1500',
+      text: widget.task?.targetSeconds.toString() ?? '3600', // 默认1小时
     );
-    _mode = widget.task?.mode ?? TimerMode.countdown;
+    _mode = widget.task?.mode ?? TimerMode.stopwatch; // 默认为计时模式
     _priority = widget.task?.priority ?? Priority.medium;
     _tags = widget.task?.tags ?? [];
     _dueDate = widget.task?.dueDate;
@@ -90,9 +92,12 @@ class _EditTaskPageState extends State<EditTaskPage> {
   @override
   Widget build(BuildContext context) {
     final isEdit = widget.task != null;
-    return Scaffold(
+    final appState = context.watch<AppState>();
+    final needsGradient = appState.currentTheme == AppTheme.liquidGlass;
+    
+    final scaffold = Scaffold(
       appBar: AppBar(
-        title: Text(isEdit ? '编辑任务' : '新建任务'),
+        title: Text(isEdit ? '编辑任务' : '新建清单'),
         actions: [
           IconButton(
             icon: const Icon(Icons.check),
@@ -285,5 +290,9 @@ class _EditTaskPageState extends State<EditTaskPage> {
         ),
       ),
     );
+    
+    return needsGradient 
+        ? GradientBackground(child: scaffold)
+        : scaffold;
   }
 }

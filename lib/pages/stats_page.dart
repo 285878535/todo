@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../state/app_state.dart';
+import '../widgets/gradient_background.dart';
+import '../theme.dart';
 
 class StatsPage extends StatefulWidget {
   const StatsPage({super.key});
@@ -28,8 +30,9 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    final needsGradient = state.currentTheme == AppTheme.liquidGlass;
     
-    return Scaffold(
+    final scaffold = Scaffold(
       appBar: AppBar(
         title: const Text('📊 统计'),
         bottom: TabBar(
@@ -41,17 +44,11 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
           ],
           labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           unselectedLabelStyle: const TextStyle(fontSize: 14),
+          dividerColor: Colors.transparent,
+          dividerHeight: 0,
         ),
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFEAF1FF), Color(0xFFFDF7F2)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: TabBarView(
+      body: TabBarView(
           controller: _tabController,
           children: [
             _WeeklyStatsView(state: state),
@@ -59,8 +56,11 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
             _YearlyStatsView(state: state),
           ],
         ),
-      ),
     );
+    
+    return needsGradient 
+        ? GradientBackground(child: scaffold)
+        : scaffold;
   }
 }
 
@@ -122,7 +122,7 @@ class _WeeklyStatsView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: c.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(color: c.primary.withValues(alpha: 0.08), blurRadius: 16, offset: const Offset(0, 8)),
@@ -223,7 +223,7 @@ class _WeeklyStatsView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: c.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(color: c.primary.withValues(alpha: 0.08), blurRadius: 16, offset: const Offset(0, 8)),
@@ -416,7 +416,7 @@ class _MonthlyStatsView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: c.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(color: c.primary.withValues(alpha: 0.08), blurRadius: 16, offset: const Offset(0, 8)),
@@ -448,7 +448,7 @@ class _MonthlyStatsView extends StatelessWidget {
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: false,
-                  horizontalInterval: _getMaxValue(data) / 4,
+                  horizontalInterval: _getMaxValue(data) > 0 ? _getMaxValue(data) / 4 : 1,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(color: c.outline.withValues(alpha: 0.1), strokeWidth: 1);
                   },
@@ -515,7 +515,7 @@ class _MonthlyStatsView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: c.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(color: c.primary.withValues(alpha: 0.08), blurRadius: 16, offset: const Offset(0, 8)),
@@ -610,7 +610,9 @@ class _MonthlyStatsView extends StatelessWidget {
   }
 
   double _getMaxValue(List<MonthlyData> data) {
-    return data.isEmpty ? 100 : data.map((d) => d.totalSeconds).fold(0, (a, b) => a > b ? a : b).toDouble();
+    if (data.isEmpty) return 100;
+    final maxValue = data.map((d) => d.totalSeconds).fold(0, (a, b) => a > b ? a : b).toDouble();
+    return maxValue > 0 ? maxValue : 100;
   }
 }
 
@@ -676,7 +678,7 @@ class _YearlyStatsView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: c.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(color: c.primary.withValues(alpha: 0.08), blurRadius: 16, offset: const Offset(0, 8)),
@@ -740,7 +742,7 @@ class _YearlyStatsView extends StatelessWidget {
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: false,
-                  horizontalInterval: _getMaxValue(data) / 4,
+                  horizontalInterval: _getMaxValue(data) > 0 ? _getMaxValue(data) / 4 : 1,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(color: c.outline.withValues(alpha: 0.1), strokeWidth: 1);
                   },
@@ -777,7 +779,7 @@ class _YearlyStatsView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: c.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(color: c.primary.withValues(alpha: 0.08), blurRadius: 16, offset: const Offset(0, 8)),
@@ -866,7 +868,9 @@ class _YearlyStatsView extends StatelessWidget {
   }
 
   double _getMaxValue(List<YearlyData> data) {
-    return data.isEmpty ? 100 : data.map((d) => d.totalSeconds).fold(0, (a, b) => a > b ? a : b).toDouble();
+    if (data.isEmpty) return 100;
+    final maxValue = data.map((d) => d.totalSeconds).fold(0, (a, b) => a > b ? a : b).toDouble();
+    return maxValue > 0 ? maxValue : 100;
   }
 
   List<Achievement> _calculateAchievements(List<YearlyData> data) {

@@ -28,5 +28,25 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>需要访问您的照片库以设置自定义背景</string>
+	<!-- App Transport Security 例外：允许指定域名使用 HTTP -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>api.deepauto.xyz</key>
+			<dict>
+				<!-- 允许该域名的明文 HTTP -->
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<!-- 包含子域 -->
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
 </dict>
 </plist>

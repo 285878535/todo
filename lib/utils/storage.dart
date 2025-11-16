@@ -11,6 +11,8 @@ class Storage {
   static const _lastResetKey = 'lastResetDate';
   static const _dailyGoalKey = 'dailyGoalSeconds';
   static const _themeKey = 'appTheme';
+  static const _backgroundImageKey = 'backgroundImagePath';
+  static const _isFirstLaunchKey = 'isFirstLaunch';
 
   static Future<List<Task>> loadTasks() async {
     final prefs = await SharedPreferences.getInstance();
@@ -75,5 +77,31 @@ class Storage {
   static Future<void> saveTheme(AppTheme theme) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_themeKey, theme.index);
+  }
+
+  static Future<String?> loadBackgroundImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_backgroundImageKey);
+  }
+
+  static Future<void> saveBackgroundImage(String? path) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (path == null) {
+      await prefs.remove(_backgroundImageKey);
+    } else {
+      await prefs.setString(_backgroundImageKey, path);
+    }
+  }
+
+  // 检查是否是首次启动
+  static Future<bool> isFirstLaunch() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_isFirstLaunchKey) ?? true;
+  }
+
+  // 标记已经不是首次启动
+  static Future<void> setNotFirstLaunch() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_isFirstLaunchKey, false);
   }
 }

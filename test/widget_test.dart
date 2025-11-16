@@ -12,7 +12,7 @@ void main() {
   testWidgets('主页渲染', (tester) async {
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
-    expect(find.text('习惯待办'), findsOneWidget);
-    expect(find.text('新建任务'), findsOneWidget);
+    expect(find.text('即刻清单'), findsOneWidget);
+    expect(find.text('新建清单'), findsOneWidget);
   });
 }

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- 仅对 api.deepauto.xyz 允许明文 HTTP；其他域名仍按系统默认策略（HTTPS） -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">api.deepauto.xyz</domain>
+    </domain-config>
+</network-security-config>
+
+

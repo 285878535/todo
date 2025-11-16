@@ -21,6 +21,7 @@ class AppState extends ChangeNotifier {
   Timer? _midnightTimer;
   int _dailyGoalSeconds = 3600;
   AppTheme _currentTheme = AppTheme.light;
+  String? _backgroundImagePath;
 
   List<Task> get tasks => List.unmodifiable(_tasks);
   String? get activeTaskId => _activeTaskId;
@@ -30,6 +31,7 @@ class AppState extends ChangeNotifier {
   List<Record> get records => List.unmodifiable(_records);
   int get dailyGoalSeconds => _dailyGoalSeconds;
   AppTheme get currentTheme => _currentTheme;
+  String? get backgroundImagePath => _backgroundImagePath;
 
   Future<void> init() async {
     _tasks = await Storage.loadTasks();
@@ -37,16 +39,21 @@ class AppState extends ChangeNotifier {
     _records = await Storage.loadRecords();
     _dailyGoalSeconds = await Storage.loadDailyGoalSeconds();
     _currentTheme = await Storage.loadTheme();
+    _backgroundImagePath = await Storage.loadBackgroundImage();
     
     // Initialize notifications
     await NotificationService.initialize();
     
     await _ensureDailyReset();
     _scheduleMidnightReset();
-    if (_tasks.isEmpty) {
-      await addTask(name: '专注番茄 25 分', mode: TimerMode.countdown, targetSeconds: 1500);
-      await addTask(name: '阅读计时', mode: TimerMode.stopwatch);
-    }
+    
+    // 不再自动创建示例任务，让用户通过新手引导学习如何创建任务
+    // final isFirstLaunch = await Storage.isFirstLaunch();
+    // if (isFirstLaunch && _tasks.isEmpty) {
+    //   await _createSampleTasks();
+    //   await Storage.setNotFirstLaunch();
+    // }
+    
     notifyListeners();
   }
 
@@ -184,18 +191,9 @@ class AppState extends ChangeNotifier {
     _updateStreakFor(completedTaskId);
     _appendRecordFor(completedTaskId);
     
-    // Handle recurring tasks
-    final taskIndex = _tasks.indexWhere((t) => t.id == completedTaskId);
-    if (taskIndex != -1) {
-      final task = _tasks[taskIndex];
-      if (task.isRecurring && task.recurringPattern != null) {
-        // For recurring tasks, create a new instance for the next occurrence
-        final nextTask = RecurringTaskManager.createRecurringInstance(task, DateTime.now());
-        // Generate a new ID for the next instance
-        final newTask = nextTask.copyWith(id: _uuid.v4());
-        _tasks = [..._tasks, newTask];
-      }
-    }
+    // 对于重复任务，不要立即创建新任务
+    // 而是等到0点后通过 _ensureDailyReset() 重新生成
+    // 这样可以确保重复任务在第二天才出现
     
     // Show completion notification
     final completedTask = _tasks.firstWhere((t) => t.id == completedTaskId);
@@ -323,6 +321,12 @@ class AppState extends ChangeNotifier {
   Future<void> setTheme(AppTheme theme) async {
     _currentTheme = theme;
     await Storage.saveTheme(theme);
+    notifyListeners();
+  }
+
+  Future<void> setBackgroundImage(String? path) async {
+    _backgroundImagePath = path;
+    await Storage.saveBackgroundImage(path);
     notifyListeners();
   }
 }
