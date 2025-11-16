@@ -44,9 +44,8 @@ class _MyAppState extends State<MyApp> {
     await Future.delayed(const Duration(seconds: 2));
     
     try {
-      // 使用远程静态清单（占位 URL，替换为你的 GitHub Raw 或自建地址）
-      const manifestUrl = 'https://example.com/version.json';
-      final updateInfo = await UpdateService.checkUpdateFromManifest(manifestUrl);
+      // 使用自动清单地址（主+镜像）轮询
+      final updateInfo = await UpdateService.checkUpdateAuto();
 
       if (updateInfo.hasUpdate && mounted) {
         WidgetsBinding.instance.addPostFrameCallback((_) {

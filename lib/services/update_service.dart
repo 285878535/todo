@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/foundation.dart';
 
 /// 更新信息模型
 class UpdateInfo {
@@ -83,7 +85,52 @@ class UpdateService {
   static const String _appId = 'com.example.todo';
   
   // 超时时间
-  static const Duration _timeout = Duration(seconds: 10);
+  static const Duration _timeout = Duration(seconds: 25);
+  // 默认清单地址（主+镜像），可在此替换为你的地址
+  static const List<String> _defaultManifestUrls = [
+    // GitHub Raw 主地址
+    'https://raw.githubusercontent.com/285878535/todo/main/version.json',
+    // jsDelivr CDN（中国大陆更稳定）
+    'https://cdn.jsdelivr.net/gh/285878535/todo@main/version.json',
+    // GitHub 加速镜像（可选，视可用性）
+    'https://fastly.jsdelivr.net/gh/285878535/todo@main/version.json',
+  ];
+
+  /// 是否使用系统代理（通过环境变量 HTTP_PROXY/HTTPS_PROXY/ALL_PROXY）
+  static bool useSystemProxy = true;
+
+  // 基于开关创建 IOClient
+  static IOClient _createClient() {
+    final httpClient = HttpClient()
+      ..badCertificateCallback = (cert, host, port) => false;
+    if (useSystemProxy) {
+      httpClient.findProxy = HttpClient.findProxyFromEnvironment;
+    } else {
+      httpClient.findProxy = (uri) => 'DIRECT';
+    }
+    return IOClient(httpClient);
+  }
+
+  static Future<http.Response> _getWithRetry(Uri uri, {int retries = 1}) async {
+    int attempt = 0;
+    final client = _createClient();
+    while (true) {
+      try {
+        return await client.get(
+          uri,
+          headers: const {
+            'Accept': 'application/json',
+            'User-Agent': 'todo-app/1.0 (+flutter; macos)',
+          },
+        ).timeout(_timeout);
+      } on TimeoutException catch (_) {
+        if (attempt >= retries) rethrow;
+      }
+      // 简单退避
+      await Future.delayed(const Duration(seconds: 1));
+      attempt += 1;
+    }
+  }
 
   /// 通过远程静态清单文件（例如 GitHub Raw 或自建服务器上的 version.json）检查更新
   ///
@@ -104,12 +151,19 @@ class UpdateService {
   ///      { "code": 200, "data": { ...同上... } }
   static Future<UpdateInfo> checkUpdateFromManifest(String manifestUrl) async {
     try {
+      debugPrint('[Update] fetching manifest: $manifestUrl');
       final packageInfo = await PackageInfo.fromPlatform();
       final currentVersion = packageInfo.version;
       final buildNumber = int.tryParse(packageInfo.buildNumber) ?? 1;
 
-      final resp = await http.get(Uri.parse(manifestUrl)).timeout(_timeout);
+      // 避免缓存：追加时间戳参数
+      final uri = Uri.parse(manifestUrl).replace(queryParameters: {
+        ...Uri.parse(manifestUrl).queryParameters,
+        't': DateTime.now().millisecondsSinceEpoch.toString(),
+      });
+      final resp = await _getWithRetry(uri);
       if (resp.statusCode != 200) {
+        debugPrint('[Update] manifest http ${resp.statusCode} from $manifestUrl');
         throw UpdateCheckException(
           type: UpdateErrorType.server,
           message: '拉取清单失败，状态码 ${resp.statusCode}',
@@ -150,16 +204,19 @@ class UpdateService {
         releaseDate: releaseDate,
       );
     } on SocketException catch (_) {
+      debugPrint('[Update] SocketException when fetching manifest: $manifestUrl');
       throw const UpdateCheckException(
         type: UpdateErrorType.network,
         message: '无法连接更新清单，请检查网络连接',
       );
     } on TimeoutException catch (_) {
+      debugPrint('[Update] Timeout when fetching manifest: $manifestUrl');
       throw const UpdateCheckException(
         type: UpdateErrorType.network,
         message: '连接更新清单超时，请稍后重试',
       );
     } on FormatException catch (_) {
+      debugPrint('[Update] FormatException: invalid JSON from $manifestUrl');
       throw const UpdateCheckException(
         type: UpdateErrorType.invalidResponse,
         message: '清单文件不是有效的 JSON',
@@ -167,11 +224,70 @@ class UpdateService {
     } on UpdateCheckException {
       rethrow;
     } catch (e) {
+      debugPrint('[Update] Unknown error when fetching manifest $manifestUrl: $e');
       throw UpdateCheckException(
         type: UpdateErrorType.unknown,
         message: '解析更新清单失败: $e',
       );
     }
+  }
+
+  /// 依次尝试多个清单地址，返回第一个成功的结果
+  static Future<UpdateInfo> checkUpdateAuto({List<String>? manifestUrls}) async {
+    final urls = manifestUrls?.toList() ?? _defaultManifestUrls;
+    UpdateCheckException? lastError;
+    for (final url in urls) {
+      try {
+        debugPrint('[Update] try manifest url: $url');
+        return await checkUpdateFromManifest(url);
+      } on UpdateCheckException catch (e) {
+        debugPrint('[Update] failed url: $url -> ${e.message}');
+        lastError = e;
+        // 继续尝试下一个
+      } catch (e) {
+        debugPrint('[Update] failed url: $url -> $e');
+        lastError = UpdateCheckException(
+          type: UpdateErrorType.unknown,
+          message: '未知错误: $e',
+        );
+      }
+    }
+    // 全部失败，抛出最后一个错误
+    if (lastError != null) {
+      throw lastError;
+    }
+    throw const UpdateCheckException(
+      type: UpdateErrorType.network,
+      message: '无法连接任何更新清单地址',
+    );
+  }
+
+  /// 简单网络自检：测试给定URL（默认 httpbin 与首选清单）
+  static Future<Map<String, String>> diagnoseConnectivity({List<String>? urls}) async {
+    final targets = urls?.toList() ?? [
+      'https://httpbin.org/get',
+      'https://www.qq.com/',
+      'https://www.baidu.com/',
+      ..._defaultManifestUrls,
+    ];
+    final result = <String, String>{};
+    for (final u in targets) {
+      try {
+        final uri = Uri.parse(u).replace(queryParameters: {
+          ...Uri.parse(u).queryParameters,
+          't': DateTime.now().millisecondsSinceEpoch.toString(),
+        });
+        final resp = await _getWithRetry(uri, retries: 0);
+        result[u] = 'OK (${resp.statusCode})';
+      } on TimeoutException {
+        result[u] = 'Timeout';
+      } on SocketException catch (e) {
+        result[u] = 'SocketException: ${e.message}';
+      } catch (e) {
+        result[u] = 'Error: $e';
+      }
+    }
+    return result;
   }
   /// 检查更新
   /// 
