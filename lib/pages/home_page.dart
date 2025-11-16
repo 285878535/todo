@@ -71,6 +71,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Consumer<AppState>(builder: (context, state, _) {
+      final topInset = MediaQuery.of(context).padding.top + kToolbarHeight;
       return Scaffold(
         appBar: AppBar(
           title: const Text('即刻清单'),
@@ -93,10 +94,14 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
+        extendBodyBehindAppBar: true,
         body: state.tasks.isEmpty
-            ? const _EmptyView()
+            ? Padding(
+                padding: EdgeInsets.only(top: topInset),
+                child: const _EmptyView(),
+              )
             : ListView.builder(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.fromLTRB(16, 16 + topInset, 16, 16),
                 itemCount: state.tasks.length,
                 itemBuilder: (context, index) {
                     final t = state.tasks[index];
@@ -182,7 +187,8 @@ class _EmptyView extends StatelessWidget {
     final c = Theme.of(context).colorScheme;
     final isDark = c.brightness == Brightness.dark;
     
-    return Center(
+    return Align(
+      alignment: const Alignment(0, -0.15), // 略微上移，避免遮住底部按钮
       child: ClipRRect(
         borderRadius: BorderRadius.circular(28),
         child: BackdropFilter(

@@ -96,18 +96,11 @@ class UpdateService {
     'https://fastly.jsdelivr.net/gh/285878535/todo@main/version.json',
   ];
 
-  /// 是否使用系统代理（通过环境变量 HTTP_PROXY/HTTPS_PROXY/ALL_PROXY）
-  static bool useSystemProxy = true;
-
-  // 基于开关创建 IOClient
+  // 创建 IOClient（遵循环境代理）
   static IOClient _createClient() {
     final httpClient = HttpClient()
       ..badCertificateCallback = (cert, host, port) => false;
-    if (useSystemProxy) {
-      httpClient.findProxy = HttpClient.findProxyFromEnvironment;
-    } else {
-      httpClient.findProxy = (uri) => 'DIRECT';
-    }
+    httpClient.findProxy = HttpClient.findProxyFromEnvironment;
     return IOClient(httpClient);
   }
 
@@ -263,32 +256,7 @@ class UpdateService {
   }
 
   /// 简单网络自检：测试给定URL（默认 httpbin 与首选清单）
-  static Future<Map<String, String>> diagnoseConnectivity({List<String>? urls}) async {
-    final targets = urls?.toList() ?? [
-      'https://httpbin.org/get',
-      'https://www.qq.com/',
-      'https://www.baidu.com/',
-      ..._defaultManifestUrls,
-    ];
-    final result = <String, String>{};
-    for (final u in targets) {
-      try {
-        final uri = Uri.parse(u).replace(queryParameters: {
-          ...Uri.parse(u).queryParameters,
-          't': DateTime.now().millisecondsSinceEpoch.toString(),
-        });
-        final resp = await _getWithRetry(uri, retries: 0);
-        result[u] = 'OK (${resp.statusCode})';
-      } on TimeoutException {
-        result[u] = 'Timeout';
-      } on SocketException catch (e) {
-        result[u] = 'SocketException: ${e.message}';
-      } catch (e) {
-        result[u] = 'Error: $e';
-      }
-    }
-    return result;
-  }
+  // 自检功能已移除
   /// 检查更新
   /// 
   /// 返回 UpdateInfo 对象，失败时抛出 UpdateCheckException

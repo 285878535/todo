@@ -406,116 +406,19 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: _isCheckingUpdate ? null : _checkUpdate,
                     enabled: !_isCheckingUpdate,
                   ),
+                  
                   ListTile(
-                    leading: const Icon(Icons.wifi_tethering),
-                    title: const Text('网络自检（调试）'),
-                    subtitle: const Text('测试清单与网络连通性'),
+                    leading: const Icon(Icons.help_outline),
+                    title: const Text('新手引导'),
+                    subtitle: const Text('重新查看应用功能引导'),
                     dense: true,
-                    onTap: () async {
-                      final results = await UpdateService.diagnoseConnectivity();
-                      if (!mounted) return;
-                      showDialog(
-                        context: context,
-                        builder: (_) => AlertDialog(
-                          title: const Text('网络自检结果'),
-                          content: SingleChildScrollView(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: results.entries.map((e) => Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: Text('${e.key}\n→ ${e.value}', style: const TextStyle(fontSize: 12)),
-                              )).toList(),
-                            ),
-                          ),
-                          actions: [
-                            TextButton(onPressed: () => Navigator.pop(context), child: const Text('关闭')),
-                          ],
-                        ),
-                      );
+                    onTap: () {
+                      _showTutorial();
                     },
                   ),
-                  SwitchListTile(
-                    title: const Text('使用系统代理（调试）'),
-                    subtitle: const Text('启用/禁用 HTTP_PROXY/HTTPS_PROXY 等环境变量'),
-                    value: UpdateService.useSystemProxy,
-                    onChanged: (v) {
-                      setState(() {
-                        UpdateService.useSystemProxy = v;
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(v ? '已启用系统代理' : '已禁用系统代理')),
-                      );
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.manage_search),
-                    title: const Text('自定义URL连通性测试'),
-                    subtitle: const Text('输入一个或多个URL（换行/逗号分隔）'),
-                    dense: true,
-                    onTap: () async {
-                      final controller = TextEditingController(
-                        text: 'https://httpbin.org/get\nhttps://raw.githubusercontent.com/285878535/todo/main/version.json',
-                      );
-                      await showDialog(
-                        context: context,
-                        builder: (_) => AlertDialog(
-                          title: const Text('输入要测试的URL'),
-                          content: SizedBox(
-                            width: 480,
-                            child: TextField(
-                              controller: controller,
-                              minLines: 4,
-                              maxLines: 8,
-                              decoration: const InputDecoration(
-                                hintText: '每行一个URL，或使用逗号分隔',
-                                border: OutlineInputBorder(),
-                              ),
-                            ),
-                          ),
-                          actions: [
-                            TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
-                            FilledButton(
-                              onPressed: () async {
-                                final raw = controller.text.trim();
-                                if (raw.isEmpty) {
-                                  Navigator.pop(context);
-                                  return;
-                                }
-                                final urls = raw
-                                    .split(RegExp(r'[,\n]'))
-                                    .map((s) => s.trim())
-                                    .where((s) => s.isNotEmpty)
-                                    .toList();
-                                Navigator.pop(context);
-                                final results = await UpdateService.diagnoseConnectivity(urls: urls);
-                                if (!mounted) return;
-                                showDialog(
-                                  context: context,
-                                  builder: (_) => AlertDialog(
-                                    title: const Text('自定义测试结果'),
-                                    content: SingleChildScrollView(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: results.entries.map((e) => Padding(
-                                          padding: const EdgeInsets.only(bottom: 8),
-                                          child: Text('${e.key}\n→ ${e.value}', style: const TextStyle(fontSize: 12)),
-                                        )).toList(),
-                                      ),
-                                    ),
-                                    actions: [
-                                      TextButton(onPressed: () => Navigator.pop(context), child: const Text('关闭')),
-                                    ],
-                                  ),
-                                );
-                              },
-                              child: const Text('开始测试'),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                  ListTile(
+                  
+                 
+                   ListTile(
                     leading: const Icon(Icons.person_outline),
                     title: const Text('开发者'),
                     subtitle: const Text('Justin Xing'),
@@ -532,15 +435,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     title: const Text('功能特色'),
                     subtitle: const Text('番茄钟、习惯追踪、数据统计'),
                     dense: true,
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.help_outline),
-                    title: const Text('新手引导'),
-                    subtitle: const Text('重新查看应用功能引导'),
-                    dense: true,
-                    onTap: () {
-                      _showTutorial();
-                    },
                   ),
                   const Divider(height: 1),
                   ListTile(

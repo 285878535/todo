@@ -1,7 +1,7 @@
 {
     "latest_version": "1.2.3",
     "latest_build": 5,
-    "update_url": "http://rightnowutimer.deepauto.xyz/",
+    "update_url": "https://github.com/285878535/todo/releases/tag/v.1.2.2",
     "release_notes": "修复问题/新增功能\n新增了网络检测",
     "force_update": false,
     "min_version": "1.0.0",

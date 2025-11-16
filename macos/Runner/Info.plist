@@ -22,15 +22,6 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
-	<key>NSHumanReadableCopyright</key>
-	<string>$(PRODUCT_COPYRIGHT)</string>
-	<key>NSMainNibFile</key>
-	<string>MainMenu</string>
-	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>需要访问您的照片库以设置自定义背景</string>
-	<!-- App Transport Security 例外：允许指定域名使用 HTTP -->
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -39,14 +30,27 @@
 		<dict>
 			<key>api.deepauto.xyz</key>
 			<dict>
-				<!-- 允许该域名的明文 HTTP -->
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>
 				<true/>
-				<!-- 包含子域 -->
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+			<key>bt.deepauto.xyz</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
 				<key>NSIncludesSubdomains</key>
 				<true/>
 			</dict>
 		</dict>
 	</dict>
+	<key>NSHumanReadableCopyright</key>
+	<string>$(PRODUCT_COPYRIGHT)</string>
+	<key>NSMainNibFile</key>
+	<string>MainMenu</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>需要访问您的照片库以设置自定义背景</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
 </dict>
 </plist>
